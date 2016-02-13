@@ -6,10 +6,4 @@
             <directory>tests/AsynchronousJobsTests/</directory>
         </testsuite>
     </testsuites>
-
-    <filter>
-        <whitelist>
-            <directory suffix=".php">src/AsynchronousJobs/</directory>
-        </whitelist>
-    </filter>
 </phpunit>

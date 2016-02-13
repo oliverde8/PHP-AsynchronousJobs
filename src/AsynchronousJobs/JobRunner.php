@@ -88,7 +88,6 @@ class JobRunner
      */
     protected function _lockJob($jobDir)
     {
-        echo "$jobDir/lock\n";
         $fp = fopen("$jobDir/lock", "w+");
         if (flock($fp, LOCK_EX)) {
             return $fp;
@@ -247,8 +246,8 @@ class JobRunner
      */
     public function proccess()
     {
-        foreach ($this->runningJobs as $job) {
-            $this->isRunning($job);
+        foreach ($this->runningJobs as $jobData) {
+            $this->isRunning($jobData->job);
         }
 
         foreach ($this->pendingJobs as $job) {

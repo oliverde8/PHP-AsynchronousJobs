@@ -1,5 +1,10 @@
 <?php
 
+namespace  oliverde8\AsynchronousJobsTests;
+use oliverde8\AsynchronousJobs\Job\Sleep;
+use oliverde8\AsynchronousJobs\JobRunner;
+use oliverde8\AsynchronousJobs\Job\Sum;
+
 /**
  * @author      Oliver de Cramer (oliverde8 at gmail.com)
  * @copyright    GNU GENERAL PUBLIC LICENSE
@@ -20,7 +25,66 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
-class JobTest
+class JobTest extends \PHPUnit_Framework_TestCase
 {
+    public function testTwoSleepJobs()
+    {
+        $startTime = time();
 
+        $job1 = new Sleep();
+        $job1->time = 10;
+
+        $job2 = new Sleep();
+        $job2->time = 10;
+
+        $job1->start();
+        $job2->start();
+
+        $runTime = time() - $startTime;
+        $this->assertLessThan(2, $runTime);
+
+        JobRunner::getInstance()->waitForAll(1);
+
+        // If 2 jobs of 10 second run in less then 19 all is good.
+        $runTime = time() - $startTime;
+        $this->assertLessThan(19, $runTime);
+    }
+
+    public function testMultiSleepJobs()
+    {
+        $startTime = time();
+        for($i = 0; $i < 10; $i++) {
+            $job = new Sleep();
+            $job->time = 10;
+            $job->start();
+        }
+
+        $runTime = time() - $startTime;
+        $this->assertLessThan(10, $runTime);
+
+        JobRunner::getInstance()->waitForAll(1);
+
+        // If 10 jobs of 10 second run in less then 50 all is good.
+        $runTime = time() - $startTime;
+        $this->assertLessThan(50, $runTime);
+    }
+
+    public function testInputOutPut()
+    {
+        $job1 = new Sum();
+        $job1->a = 5;
+        $job1->b = 7;
+
+        $job2 = new Sum();
+        $job2->a = 8;
+        $job2->b = 9;
+
+        $job1->start();
+        $job2->start();
+
+        JobRunner::getInstance()->waitForAll(1);
+
+        $this->assertEquals(12, $job1->result);
+        $this->assertEquals(17, $job2->result);
+    }
 }
