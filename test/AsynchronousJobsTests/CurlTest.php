@@ -1,7 +1,9 @@
 <?php
 
 namespace  oliverde8\AsynchronousJobsTests;
+use oliverde8\AsynchronousJobs\Job;
 use oliverde8\AsynchronousJobs\Job\Curl;
+use oliverde8\AsynchronousJobs\Job\CallbackCurl;
 use oliverde8\AsynchronousJobs\JobRunner;
 
 /**
@@ -81,4 +83,30 @@ class CurlTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(201, $info['http_code']);
         $this->assertJson($curlJob->getResponse());
     }
+
+    private $_testCallbackCalled = false;
+
+    public function testCallback()
+    {
+        $curlJob = new CallbackCurl();
+        $curlJob->setMethod('GET');
+        $curlJob->setUrl('http://jsonplaceholder.typicode.com/posts');
+        $curlJob->setCallback(array($this, '_testCallbackCallback'));
+
+        $curlJob->start();
+        JobRunner::getInstance()->waitForAll(1);
+
+        $this->assertEquals(true, $this->_testCallbackCalled);
+    }
+
+    public function _testCallbackCallback(Job $curlJob)
+    {
+        $info = $curlJob->getCurlInfo();
+
+        $this->assertEquals(200, $info['http_code']);
+        $this->assertJson($curlJob->getResponse());
+
+        $this->_testCallbackCalled = true;
+    }
+
 }
