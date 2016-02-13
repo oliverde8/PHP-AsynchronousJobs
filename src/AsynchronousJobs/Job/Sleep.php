@@ -44,6 +44,6 @@ class Sleep extends Job
      */
     public function end()
     {
-        echo "I end after : {$this->time}!";
+        echo "I end after : {$this->time}!\n";
     }
 }
