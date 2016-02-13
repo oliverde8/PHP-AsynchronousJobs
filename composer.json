@@ -12,6 +12,9 @@
   "require":      {
     "php":  ">=5.4.0"
   },
+  "autoload": {
+    "psr-4": {"oliverde8\\AsynchronousJobs\\": "src/AsynchronousJobs"}
+  },
   "bin":[
     "bin/AsynchronousJobsRun.php"
   ]
