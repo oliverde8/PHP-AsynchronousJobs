@@ -79,10 +79,49 @@ JobRunner::getInstance()->waitForAll(1);
 ```
 This will block you instance until all jobs habe finished their execution. waitForAll takes in parameters the sleep time. So if you know your jobs takes a few jours to run you can increase the sleep time to a few minutes to prevent IO to be over used.
 
-**TODO** Have a $job->wait to wait only a single job?
+You may also wish for just one job to finish : 
+```
+$job1->wait();
+```
+The process will be blocked until the job1 is finished. 
+
+### Making a Curl request. 
+This is a very simple implementation for doing curl queries. **It should be improved !** But well it can be built open the job executions.
+```
+$curlJob = new Curl();
+$curlJob->setMethod('GET');
+$curlJob->setUrl('http://jsonplaceholder.typicode.com/posts');
+
+$curlJob->start();
+JobRunner::getInstance()->waitForAll(1);
+
+$info = $curlJob->getCurlInfo();
+$response = $curlJob->getResponse()
+```
+
+You can of crouse pass some parameters and do a POST queries as well. 
 
 ### Having callbacks
-**TODO**
+Something else you can do is place callbacks on your jobs in order to have a function called when the job is done.
+
+```
+public function testCallback()
+{
+    $curlJob = new CallbackCurl();
+    $curlJob->setMethod('GET');
+    $curlJob->setUrl('http://jsonplaceholder.typicode.com/posts');
+    $curlJob->setCallback(array($this, '_testCallbackCallback'));
+
+    $curlJob->start();
+    JobRunner::getInstance()->waitForAll(1);
+    echo "You should then see this !\n"
+}
+
+public function _testCallbackCallback(Job $curlJob)
+{
+    echo "You should first see this !\n";
+}
+```
 
 ### Custom settings
 Yo have custom settings you must call 
@@ -96,12 +135,9 @@ The methods can take the fallowing parameters :
 * **$phpExecutable** Path to the php executable, can be an issue on windows, on linux php alone should suffice. 
 * **$tmpPath** Path to put the temporary files used to synchronize the process. It needs to be writable by the process.
 
-## Todo 
-* **Some traits :** To add callback functionality on jobs easily
-
-I hope to finish all this by the 21/02/2016
-
-## In the future
+## TODO In the future
 * Redis support (so much cooler & faster)
+    * Note for my self : I need to separate the current JobRunner's content so that the data management section can be separated from the logic. 
 * Semaphore support
-* Shared memory between jobs
+* Shared memory between jobs & instance
+    * The jobs will do ```->push()``` when they wish to share some new data, and on the main process we will call ```->pop()``` on the job to get the latest information. The purpose for this isn't to sync a lot of data but just keep track of progress or something. 
