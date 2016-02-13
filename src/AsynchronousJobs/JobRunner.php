@@ -103,8 +103,8 @@ class JobRunner
             $data['___class'] = get_class($job);
 
             file_put_contents("$jobDir/in.serialize", serialize($data));
-            echo "php bin/run.php \"$jobDir\" & \n";
-            exec("php bin/run.php \"$jobDir\" &");
+            echo "php " . __DIR__  . "/../../bin/AsynchronousJobsRun.php \"$jobDir\" & \n";
+            exec("php " . __DIR__  . "/../../bin/AsynchronousJobsRun.php \"$jobDir\" &");
         } else {
             $this->pendingJobs[] = $job;
         }

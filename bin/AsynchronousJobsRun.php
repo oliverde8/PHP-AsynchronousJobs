@@ -20,10 +20,27 @@
  *  along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
 
+foreach (array(__DIR__ . '/../../../autoload.php', __DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php') as $file) {
+    if (file_exists($file)) {
+        define('PHPUNIT_COMPOSER_INSTALL', $file);
+        break;
+    }
+}
+
+if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+    fwrite(STDERR,
+        'You need to set up the project dependencies using the following commands:' . PHP_EOL .
+        'wget http://getcomposer.org/composer.phar' . PHP_EOL .
+        'php composer.phar install' . PHP_EOL
+    );
+    die(1);
+}
+
+require PHPUNIT_COMPOSER_INSTALL;
+
 if (empty($argv[1])) {
     die();
 }
-
 
 $data = unserialize(file_get_contents($argv[1] . '/in.serialize'));
 
