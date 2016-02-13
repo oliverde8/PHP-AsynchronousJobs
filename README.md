@@ -63,20 +63,40 @@ sleep (4);
 You should see first "I end after 2" then the message "I end after 3"
 
 ### Waiting for ongoing jobs 
-**TODO**
+
+Once you started some jobs you may decide you need to wait for them to finish. 
+
+So once you have started your jobs :
+```
+$job1->run()
+$job2->run()
+// ....
+```
+
+You can use wait all : 
+```
+JobRunner::getInstance()->waitForAll(1);
+```
+This will block you instance until all jobs habe finished their execution. waitForAll takes in parameters the sleep time. So if you know your jobs takes a few jours to run you can increase the sleep time to a few minutes to prevent IO to be over used.
+
+**TODO** Have a $job->wait to wait only a single job?
 
 ### Having callbacks
 **TODO**
 
 ### Custom settings
-**TODO**
+Yo have custom settings you must call 
+```
+JobRunner::getInstance()
+```
+Before running initiating any jobs before, it needs to be your first call !!
+
+The methods can take the fallowing parameters : 
+* **$id** Allows you to share instances between multiple process, leave it null if you don't understand it should rarely need changing. 
+* **$phpExecutable** Path to the php executable, can be an issue on windows, on linux php alone should suffice. 
+* **$tmpPath** Path to put the temporary files used to synchronize the process. It needs to be writable by the process.
 
 ## Todo 
-* **Process ongoing :** Need to checkall the on going jobs every X second & add the pending tasks as need be
-* **Clean files:** At the moment the code is in PIG mode, it leaves everything behind
-* **Configuration - PHP Binary :** At the moment will work on very few windows installations.
-* **Configuration - Tmp Path :** Need to setup the path to use any
-* **Some basic jobs :** For example a curl job that will download stuff (main usage for me)
 * **Some traits :** To add callback functionality on jobs easily
 
 I hope to finish all this by the 21/02/2016
