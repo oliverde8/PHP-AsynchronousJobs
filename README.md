@@ -1,7 +1,5 @@
 # Asynchronous - Jobs
 
-**WORK IN PROGRESS**
-
 PHP AsynchronousJobs is a small library allowing to run PHP code in parallel of your main code. In some ways it works like threads but it doesen't use the proper system libraries to do so. 
 
 The library was created to work on windows & linux systems without the need of installing phpthread extension. **The library must not be considered as replacement to threads !!** The way the library works isn't optimized to for that. 
