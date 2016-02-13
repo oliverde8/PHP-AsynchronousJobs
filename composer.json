@@ -12,8 +12,14 @@
   "require":      {
     "php":  ">=5.4.0"
   },
+  "require-dev": {
+    "phpunit/phpunit": "4.*"
+  },
   "autoload": {
     "psr-4": {"oliverde8\\AsynchronousJobs\\": "src/AsynchronousJobs"}
+  },
+  "autoload-dev": {
+    "psr-4": {"oliverde8\\AsynchronousJobsTests\\": "test/AsynchronousJobsTests"}
   },
   "bin":[
     "bin/AsynchronousJobsRun.php"
