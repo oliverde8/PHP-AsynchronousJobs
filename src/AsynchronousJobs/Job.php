@@ -24,15 +24,32 @@ namespace oliverde8\AsynchronousJobs;
  */
 abstract class Job
 {
+    /** @var \Exception Will be null if there are no exceptions */
+    protected $___exception = null;
+
+    /**
+     * Create the new execution, O yeaah.
+     */
     final public function start() {
         $jobRunner = JobRunner::getInstance();
         $jobRunner->start($this);
     }
 
+    /**
+     * Unique id, multiple jobs with the same id can't run at the sma time.
+     * You may use this to prevent some jobs to run at the same time.
+     *
+     * @return string
+     */
     public function getId() {
         return md5(spl_object_hash($this));
     }
 
+    /**
+     * Get the data of the job for sending to the new process.
+     *
+     * @return array
+     */
     public function getData()
     {
         $data = array();
@@ -43,6 +60,11 @@ abstract class Job
         return $data;
     }
 
+    /**
+     * But back the job together from what comes from the other process.
+     *
+     * @param $data
+     */
     public function setData($data)
     {
         foreach ($data as $key => $value) {
@@ -50,6 +72,11 @@ abstract class Job
         }
     }
 
+    /**
+     * Check if this job is still running.
+     *
+     * @return bool
+     */
     public function isRunning()
     {
         $jobRunner = JobRunner::getInstance();

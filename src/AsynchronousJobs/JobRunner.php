@@ -172,30 +172,36 @@ class JobRunner
      *
      * @param Job $job The job to check.
      *
+     * @throws \Exception
+     *
      * @return bool
      */
     protected function _getJobResult(Job $job)
     {
-        $jobDir = $this->_getJobDirectory($job);
-        if (file_exists("$jobDir/out.serialize")) {
-            $data = file_get_contents("$jobDir/out.serialize");
+        $jobHash = spl_object_hash($job);
+        if (isset($this->runningJobs[$jobHash])) {
+            $jobDir = $this->_getJobDirectory($job);
+            if (file_exists("$jobDir/out.serialize")) {
+                $data = unserialize(file_get_contents("$jobDir/out.serialize"));
 
-            $jobData = $this->runningJobs[spl_object_hash($job)];
+                $jobData = $this->runningJobs[$jobHash];
 
-            $job->setData(unserialize($data));
-            $job->end($jobData);
+                if (!isset($data['___exception'])) {
+                    $job->setData($data);
+                    $job->end($jobData);
+                }
 
-            // Delete data on this job.
-            flock($jobData->lockFile, LOCK_UN);
-            fclose($jobData->lockFile);
-            $this->rm($jobData->jobDir);
+                // Delete data on this job.
+                flock($jobData->lockFile, LOCK_UN);
+                fclose($jobData->lockFile);
+                $this->rm($jobData->jobDir);
 
-            unset($this->runningJobs[spl_object_hash($job)]);
-
-            return true;
-        } else {
-            return false;
+                unset($this->runningJobs[spl_object_hash($job)]);
+                return true;
+            }
         }
+
+        return false;
     }
 
     /**

@@ -46,11 +46,16 @@ $data = unserialize(file_get_contents($argv[1] . '/in.serialize'));
 
 $class = $data['___class'];
 
-/** @var \oliverde8\AsynchronousJobs\Job $job */
-echo $class;
-$job = new $class();
-$job->setData($data);
-$job->run();
+try {
+    /** @var \oliverde8\AsynchronousJobs\Job $job */
+    echo $class;
+    $job = new $class();
+    $job->setData($data);
+    $job->run();
+    $data = $job->getData();
+} catch (Exception $e) {
+    $data['___exception'] = $e;
+}
 
 file_put_contents($argv[1] . '/out_temp.serialize', serialize($job->getData()));
 rename($argv[1] . '/out_temp.serialize', $argv[1] . '/out.serialize');
