@@ -1,0 +1,18 @@
+{
+  "name":         "oliverde8/asynchronous-jobs",
+  "type":         "library",
+  "description":  "Execute new php instances easily as you would threads.",
+  "license":      "MIT",
+  "authors":      [
+    {
+      "name":     "Oliver de Cramer",
+      "homepage": "http://oliver-decramer.com"
+    }
+  ],
+  "require":      {
+    "php":  ">=5.4.0"
+  },
+  "bin":[
+    "bin/AsynchronousJobsRun.php"
+  ]
+}
