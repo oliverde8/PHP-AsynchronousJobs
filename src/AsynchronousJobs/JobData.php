@@ -24,9 +24,12 @@ namespace oliverde8\AsynchronousJobs;
  */
 class JobData
 {
-    /** @var  resource */
+    /** @var string Directory where the job is working */
+    public $jobDir;
+
+    /** @var resource */
     public $lockFile;
 
-    /** @var  Job */
+    /** @var Job */
     public $job;
 }

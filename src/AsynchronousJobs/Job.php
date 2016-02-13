@@ -66,7 +66,9 @@ abstract class Job
     /**
      * Method called by the original instance when the job has ran.
      *
+     * @param JobData $jobData Data about the job
+     *
      * @return mixed
      */
-    abstract public function end();
+    abstract public function end(JobData $jobData);
 }

@@ -2,6 +2,7 @@
 
 namespace oliverde8\AsynchronousJobs\Job;
 use oliverde8\AsynchronousJobs\Job;
+use oliverde8\AsynchronousJobs\JobData;
 
 /**
  * @author      Oliver de Cramer (oliverde8 at gmail.com)
@@ -42,7 +43,7 @@ class Sleep extends Job
      *
      * @return mixed
      */
-    public function end()
+    public function end(JobData $data)
     {
         echo "I end after : {$this->time}!\n";
     }
