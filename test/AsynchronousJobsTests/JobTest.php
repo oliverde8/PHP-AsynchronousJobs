@@ -87,4 +87,17 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(12, $job1->result);
         $this->assertEquals(17, $job2->result);
     }
+
+    public function testWait()
+    {
+        $startTime = time();
+
+        $job1 = new Sleep();
+        $job1->time = 5;
+        $job1->start();
+        $job1->wait();
+
+        $runTime = time() - $startTime;
+        $this->assertGreaterThanOrEqual(5, $runTime);
+    }
 }

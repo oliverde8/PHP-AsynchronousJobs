@@ -78,8 +78,6 @@ class CurlTest extends \PHPUnit_Framework_TestCase
 
         $info = $curlJob->getCurlInfo();
 
-        echo $curlJob->getResponse();
-
         $this->assertEquals(201, $info['http_code']);
         $this->assertJson($curlJob->getResponse());
     }

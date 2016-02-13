@@ -261,6 +261,13 @@ class JobRunner
         }
     }
 
+    public function wait(Job $job, $sleepTime = 1)
+    {
+        while ($job->isRunning()){
+            sleep($sleepTime);
+        }
+    }
+
     /**
      * Wait for all the jobs to be terminated.
      *

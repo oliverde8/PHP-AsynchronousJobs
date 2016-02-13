@@ -84,6 +84,15 @@ abstract class Job
     }
 
     /**
+     * Wait for this job to finish.
+     */
+    public function wait()
+    {
+        $jobRunner = JobRunner::getInstance();
+        $jobRunner->wait($this);
+    }
+
+    /**
      * Method called by the new instance to run the job.
      *
      * @return mixed
