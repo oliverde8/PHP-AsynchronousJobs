@@ -1,10 +1,22 @@
 # Asynchronous - Jobs
 
-PHP AsynchronousJobs is a small library allowing to run PHP code in parallel of your main code. In some ways it works like threads but it doesen't use the proper system libraries to do so. 
+PHP AsynchronousJobs is a small library allowing to run PHP code in parallel of your main code. In some ways it works like threads but it doesen't use the proper system libraries to do so. It is a workaround 
 
-The library was created to work on windows & linux systems without the need of installing phpthread extension. **The library must not be considered as replacement to threads !!** The way the library works isn't optimized to for that. 
+[![Latest Stable Version](https://poser.pugx.org/oliverde8/asynchronous-jobs/v/stable)](https://packagist.org/packages/oliverde8/asynchronous-jobs) [![Total Downloads](https://poser.pugx.org/oliverde8/asynchronous-jobs/downloads)](https://packagist.org/packages/oliverde8/asynchronous-jobs) [![Latest Unstable Version](https://poser.pugx.org/oliverde8/asynchronous-jobs/v/unstable)](https://packagist.org/packages/oliverde8/asynchronous-jobs) [![License](https://poser.pugx.org/oliverde8/asynchronous-jobs/license)](https://packagist.org/packages/oliverde8/asynchronous-jobs)
+
+The library was created to work on windows & linux systems without the need of installing php pthreads extension. **The library must not be considered as replacement to threads !!** The way the library works isn't optimized to for that. 
 
 It is built in the purpose of doing long tasks in parallel. A good example would be to download filess while the main script is serving informations to users. The library is ment to be used for command line tools & deamons. 
+
+## Why
+
+Even throught pthreads is fantastic many servers don't have it installed, and therefore adding a dependency to that can be blocking. In this case the library was built for the [ml-expansion](http://ml-expansion.com/) project which is used by people that wishes to have something that just works. This library answers to that question.
+
+If you need to run a few threads time to time without wanting to add a dependency to pthreads this library might just be want you need.
+
+## FAQ 
+
+https://github.com/oliverde8/PHP-AsynchronousJobs/wiki/Faq
 
 ## Usage 
 
