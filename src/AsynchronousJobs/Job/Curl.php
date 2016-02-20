@@ -38,6 +38,8 @@ class Curl extends Job
 
     protected $curlInfo = null;
 
+    protected $curlError = null;
+
     /**
      * Method called by the new instance to run the job.
      *
@@ -51,6 +53,7 @@ class Curl extends Job
         if (!empty($this->parameters)) {
             $query = '?' . http_build_query ($this->parameters);
         }
+        $this->query = $this->url . $query;
         if ($this->method == "GET") {
             curl_setopt($ch, CURLOPT_URL, $this->url . $query);
         } else {
@@ -68,6 +71,7 @@ class Curl extends Job
 
         $this->response = curl_exec($ch);
         $this->curlInfo = curl_getinfo($ch);
+        $this->curlError = curl_error($ch);
     }
 
     /**
@@ -164,10 +168,18 @@ class Curl extends Job
     /**
      * Get hte curl information.
      *
-     * @return null
+     * @return array
      */
     public function getCurlInfo()
     {
         return $this->curlInfo;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCurlError()
+    {
+        return $this->curlError;
     }
 }
