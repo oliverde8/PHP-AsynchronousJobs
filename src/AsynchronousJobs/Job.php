@@ -54,7 +54,9 @@ abstract class Job
     {
         $data = array();
         foreach (get_object_vars($this) as $key => $value) {
-            $data[$key] = $value;
+            if (strpos($key, '__') !== 0) {
+                $data[$key] = $value;
+            }
         }
 
         return $data;
