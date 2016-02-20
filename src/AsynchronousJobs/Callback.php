@@ -25,20 +25,22 @@ namespace oliverde8\AsynchronousJobs;
 
 trait Callback
 {
+    protected $__callback = null;
+
     public function setCallback($newCallback = null)
     {
-        static $callback;
+        $this->__callback = $newCallback;
 
-        if (is_null($callback)) {
-            $callback = $newCallback;
-        }
+        return $this;
+    }
 
-        return $callback;
+    public function getCallback() {
+        return $this->__callback;
     }
 
     public function callCallback($jobData)
     {
-        call_user_func($this->setCallback(), $this, $jobData);
+        call_user_func($this->__callback, $this, $jobData);
     }
 
     public function end(JobData $jobData) {

@@ -85,6 +85,7 @@ class CurlTest extends \PHPUnit_Framework_TestCase
     }
 
     private $_testCallbackCalled = false;
+    private $_testCallbackCalled2 = false;
 
     public function testCallback()
     {
@@ -92,11 +93,18 @@ class CurlTest extends \PHPUnit_Framework_TestCase
         $curlJob->setMethod('GET');
         $curlJob->setUrl('http://jsonplaceholder.typicode.com/posts');
         $curlJob->setCallback(array($this, '_testCallbackCallback'));
-
         $curlJob->start();
+
+        $curlJob = new CallbackCurl();
+        $curlJob->setMethod('GET');
+        $curlJob->setUrl('http://jsonplaceholder.typicode.com/posts');
+        $curlJob->setCallback(array($this, '_testCallbackCallback2'));
+        $curlJob->start();
+
         JobRunner::getInstance()->waitForAll(1);
 
         $this->assertEquals(true, $this->_testCallbackCalled);
+        $this->assertEquals(true, $this->_testCallbackCalled2);
     }
 
     public function _testCallbackCallback(Job $curlJob)
@@ -107,6 +115,16 @@ class CurlTest extends \PHPUnit_Framework_TestCase
         $this->assertJson($curlJob->getResponse());
 
         $this->_testCallbackCalled = true;
+    }
+
+    public function _testCallbackCallback2(Job $curlJob)
+    {
+        $info = $curlJob->getCurlInfo();
+
+        $this->assertEquals(200, $info['http_code']);
+        $this->assertJson($curlJob->getResponse());
+
+        $this->_testCallbackCalled2 = true;
     }
 
 }
