@@ -145,6 +145,19 @@ The methods can take the fallowing parameters :
 * **$phpExecutable** Path to the php executable, can be an issue on windows, on linux php alone should suffice. 
 * **$tmpPath** Path to put the temporary files used to synchronize the process. It needs to be writable by the process.
 
+### Stuff to now
+
+#### Ignored variables : 
+All variables you set in a job is transfered to the new execution(thread) once the job starts and are then updated when to job finishes with the new values coming from the job. 
+This varibles may be privete or public, they are going to be serialized and passed to the new execution. Once the execution finishes they will be serialized again and sent back to the main execution.
+
+In some cases we may wish to have values available only on the main process or on the new execution. All variables prefixed by a double underscore("_") will be ignored during transfer. 
+
+Example :
+```
+private $__test = 'tt';
+```
+
 ## TODO In the future
 * Redis support (so much cooler & faster)
     * Note for my self : I need to separate the current JobRunner's content so that the data management section can be separated from the logic. 
