@@ -138,6 +138,7 @@ class JobRunner
     public function start(Job $job)
     {
         $jobDir = $this->_getJobDirectory($job);
+        $logFile = realpath($this->getDirectory()) . '/run.log';
         $lockFile = $this->_lockJob($jobDir);
 
         if ($lockFile) {
@@ -153,13 +154,13 @@ class JobRunner
 
             file_put_contents("$jobDir/in.serialize", serialize($data));
 
-            $cmd = "php " . __DIR__  . "/../../bin/AsynchronousJobsRun.php \"$jobDir\"";
+            $cmd = "php " . __DIR__  . "/../../bin/AsynchronousJobsRun.php \"$jobDir\" >> $logFile";
             if (substr(php_uname(), 0, 7) == "Windows"){
                 $WshShell = new \COM("WScript.Shell");
                 $WshShell->Run("$cmd /C dir /S %windir%", 0, false);
             }
             else {
-                exec($cmd . " > /dev/null &");
+                exec($cmd . " &");
             }
 
         } else {
