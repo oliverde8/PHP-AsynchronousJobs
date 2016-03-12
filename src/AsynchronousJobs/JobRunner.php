@@ -38,6 +38,8 @@ class JobRunner
     /** @var JobData[] */
     private $runningJobs = [];
 
+    private $exec = false;
+
     /**
      * Get the job runner instance. Parameters are used only on first creation.
      *
@@ -65,6 +67,11 @@ class JobRunner
             $this->_id = $id;
         } else {
             $this->_id = md5(spl_object_hash($this) . microtime());
+        }
+
+        // Check if exec is enabled on this server.
+        if(exec('echo EXEC') == 'EXEC'){
+            $this->exec = true;
         }
     }
 
@@ -137,6 +144,7 @@ class JobRunner
      */
     public function start(Job $job)
     {
+
         $jobDir = $this->_getJobDirectory($job);
         $logFile = realpath($this->getDirectory()) . '/run.log';
         $lockFile = $this->_lockJob($jobDir);
@@ -149,18 +157,22 @@ class JobRunner
 
             $this->runningJobs[spl_object_hash($job)] = $jobData;
 
-            $data = $job->getData();
-            $data['___class'] = get_class($job);
+            if ($this->exec) {
 
-            file_put_contents("$jobDir/in.serialize", serialize($data));
+                $data = $job->getData();
+                $data['___class'] = get_class($job);
 
-            $cmd = "php " . __DIR__  . "/../../bin/AsynchronousJobsRun.php \"$jobDir\" >> $logFile";
-            if (substr(php_uname(), 0, 7) == "Windows"){
-                $WshShell = new \COM("WScript.Shell");
-                $WshShell->Run("$cmd /C dir /S %windir%", 0, false);
-            }
-            else {
-                exec($cmd . " &");
+                file_put_contents("$jobDir/in.serialize", serialize($data));
+
+                $cmd = "php " . __DIR__ . "/../../bin/AsynchronousJobsRun.php \"$jobDir\" >> $logFile";
+                if (substr(php_uname(), 0, 7) == "Windows") {
+                    $WshShell = new \COM("WScript.Shell");
+                    $WshShell->Run("$cmd /C dir /S %windir%", 0, false);
+                } else {
+                    exec($cmd . " &");
+                }
+            } else {
+                $job->run();
             }
 
         } else {
@@ -179,30 +191,36 @@ class JobRunner
      */
     protected function _getJobResult(Job $job)
     {
-        $jobHash = spl_object_hash($job);
-        if (isset($this->runningJobs[$jobHash])) {
-            $jobDir = $this->_getJobDirectory($job);
-            if (file_exists("$jobDir/out.serialize")) {
-                $data = unserialize(file_get_contents("$jobDir/out.serialize"));
+        if ($this->exec) {
+            $jobHash = spl_object_hash($job);
+            if (isset($this->runningJobs[$jobHash])) {
+                $jobDir = $this->_getJobDirectory($job);
+                if (file_exists("$jobDir/out.serialize")) {
+                    $data = unserialize(file_get_contents("$jobDir/out.serialize"));
 
-                $jobData = $this->runningJobs[$jobHash];
+                    $jobData = $this->runningJobs[$jobHash];
 
-                if (!isset($data['___exception'])) {
-                    $job->setData($data);
-                    $job->end($jobData);
+                    if (!isset($data['___exception'])) {
+                        $job->setData($data);
+                        $job->end($jobData);
+                    }
+
+                    // Delete data on this job.
+                    flock($jobData->lockFile, LOCK_UN);
+                    fclose($jobData->lockFile);
+                    $this->rm($jobData->jobDir);
+
+                    unset($this->runningJobs[spl_object_hash($job)]);
+                    return true;
                 }
-
-                // Delete data on this job.
-                flock($jobData->lockFile, LOCK_UN);
-                fclose($jobData->lockFile);
-                $this->rm($jobData->jobDir);
-
-                unset($this->runningJobs[spl_object_hash($job)]);
-                return true;
             }
-        }
 
-        return false;
+            return false;
+        } else {
+            $job->end($this->runningJobs[spl_object_hash($job)]);
+            unset($this->runningJobs[spl_object_hash($job)]);
+            return true;
+        }
     }
 
     /**
