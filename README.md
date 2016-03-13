@@ -63,8 +63,8 @@ $job2->sleep = 2;
 
 Now execute the jobs
 ```
-$job1->run()
-$job2->run()
+$job1->start()
+$job2->start()
 
 // And wait for the end
 sleep (4);
@@ -78,8 +78,8 @@ Once you started some jobs you may decide you need to wait for them to finish.
 
 So once you have started your jobs :
 ```
-$job1->run()
-$job2->run()
+$job1->start()
+$job2->start()
 // ....
 ```
 
