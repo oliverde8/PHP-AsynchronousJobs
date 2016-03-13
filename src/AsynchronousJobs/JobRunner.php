@@ -68,9 +68,16 @@ class JobRunner
         } else {
             $this->_id = md5(spl_object_hash($this) . microtime());
         }
-
         // Check if exec is enabled on this server.
-        if(exec('echo EXEC') == 'EXEC'){
+        if (substr(php_uname(), 0, 7) == "Windows") {
+            try {
+                $WshShell = new \COM("WScript.Shell");
+                $WshShell->Run("echo exec", 0, false);
+                $this->exec = true;
+            } catch (\Exception $e) {
+                // nothing exec is disabled.
+            }
+        } else if(exec('echo EXEC') == 'EXEC'){
             $this->exec = true;
         }
     }
@@ -189,38 +196,41 @@ class JobRunner
      *
      * @return bool
      */
+    /**
+     * Check if a job is terminated, handle the finish & return true or false if finished or not.
+     *
+     * @param Job $job The job to check.
+     *
+     * @throws \Exception
+     *
+     * @return bool
+     */
     protected function _getJobResult(Job $job)
     {
-        if ($this->exec) {
-            $jobHash = spl_object_hash($job);
-            if (isset($this->runningJobs[$jobHash])) {
-                $jobDir = $this->_getJobDirectory($job);
-                if (file_exists("$jobDir/out.serialize")) {
-                    $data = unserialize(file_get_contents("$jobDir/out.serialize"));
+        $jobHash = spl_object_hash($job);
+        if (isset($this->runningJobs[$jobHash])) {
+            $jobDir = $this->_getJobDirectory($job);
+            if (file_exists("$jobDir/out.serialize")) {
+                $data = unserialize(file_get_contents("$jobDir/out.serialize"));
 
-                    $jobData = $this->runningJobs[$jobHash];
+                $jobData = $this->runningJobs[$jobHash];
 
-                    if (!isset($data['___exception'])) {
-                        $job->setData($data);
-                        $job->end($jobData);
-                    }
+                $job->setData($data);
+                $job->end($jobData);
 
-                    // Delete data on this job.
-                    flock($jobData->lockFile, LOCK_UN);
-                    fclose($jobData->lockFile);
-                    $this->rm($jobData->jobDir);
+                // Delete data on this job.
+                flock($jobData->lockFile, LOCK_UN);
+                fclose($jobData->lockFile);
+                $this->rm($jobData->jobDir);
 
-                    unset($this->runningJobs[spl_object_hash($job)]);
-                    return true;
-                }
+                unset($this->runningJobs[$jobHash]);
+                return true;
+            } else {
+                return false;
             }
-
-            return false;
-        } else {
-            $job->end($this->runningJobs[spl_object_hash($job)]);
-            unset($this->runningJobs[spl_object_hash($job)]);
-            return true;
         }
+
+        return true;
     }
 
     /**
@@ -283,7 +293,7 @@ class JobRunner
     public function wait(Job $job, $sleepTime = 1)
     {
         while ($job->isRunning()){
-            sleep($sleepTime);
+            $this->sleep($sleepTime);
         }
     }
 
@@ -296,6 +306,14 @@ class JobRunner
     {
         while (!empty($this->runningJobs)) {
             $this->proccess();
+            $this->sleep($sleepTime);
+        }
+    }
+
+    protected function sleep($sleepTime) {
+        if (is_float($sleepTime)) {
+            usleep((int) ($sleepTime * 1000000));
+        } else {
             sleep($sleepTime);
         }
     }

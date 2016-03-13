@@ -55,8 +55,8 @@ try {
     $data = $job->getData();
     echo "[" . date('Y-m-d H:i:s') . "] Ended Sucessfully Job with class : $class\n";
 } catch (Exception $e) {
-    $data['___exception'] = $e;
-    echo "[" . date('Y-m-d H:i:s') . "] Error with jib with class : $class\n";
+    $job->setException($e);
+    echo "[" . date('Y-m-d H:i:s') . "] Error with job with class : $class\n";
     echo $e->getTraceAsString();
     echo "\n";
 }

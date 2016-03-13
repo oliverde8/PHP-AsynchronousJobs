@@ -25,7 +25,7 @@ namespace oliverde8\AsynchronousJobs;
 abstract class Job
 {
     /** @var \Exception Will be null if there are no exceptions */
-    protected $___exception = null;
+    protected $exception = null;
 
     /**
      * Create the new execution, O yeaah.
@@ -92,6 +92,24 @@ abstract class Job
     {
         $jobRunner = JobRunner::getInstance();
         $jobRunner->wait($this);
+    }
+
+    /**
+     * Get exception that accured on the job
+     *
+     * @return \Exception
+     */
+    public function getException()
+    {
+        return $this->exception;
+    }
+
+    /**
+     * @param \Exception $__exception
+     */
+    public function setException($__exception)
+    {
+        $this->exception = $__exception;
     }
 
     /**
