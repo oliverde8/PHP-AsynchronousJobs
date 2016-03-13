@@ -2,6 +2,7 @@
 
 PHP AsynchronousJobs is a small library allowing to run PHP code in parallel of your main code. In some ways it works like threads but it doesen't use the proper system libraries to do so. It is a workaround 
 
+[![Build Status](https://travis-ci.org/oliverde8/PHP-AsynchronousJobs.svg?branch=master)](https://travis-ci.org/oliverde8/PHP-AsynchronousJobs)
 [![Latest Stable Version](https://poser.pugx.org/oliverde8/asynchronous-jobs/v/stable)](https://packagist.org/packages/oliverde8/asynchronous-jobs) [![Total Downloads](https://poser.pugx.org/oliverde8/asynchronous-jobs/downloads)](https://packagist.org/packages/oliverde8/asynchronous-jobs) [![Latest Unstable Version](https://poser.pugx.org/oliverde8/asynchronous-jobs/v/unstable)](https://packagist.org/packages/oliverde8/asynchronous-jobs) [![License](https://poser.pugx.org/oliverde8/asynchronous-jobs/license)](https://packagist.org/packages/oliverde8/asynchronous-jobs)
 
 The library was created to work on windows & linux systems without the need of installing php pthreads extension. **The library must not be considered as replacement to threads !!** The way the library works isn't optimized to for that. 
