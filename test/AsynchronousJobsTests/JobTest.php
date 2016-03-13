@@ -4,6 +4,7 @@ namespace  oliverde8\AsynchronousJobsTests;
 use oliverde8\AsynchronousJobs\Job\Sleep;
 use oliverde8\AsynchronousJobs\JobRunner;
 use oliverde8\AsynchronousJobs\Job\Sum;
+use oliverde8\AsynchronousJobsTests\Jobs\error;
 
 /**
  * @author      Oliver de Cramer (oliverde8 at gmail.com)
@@ -27,10 +28,14 @@ use oliverde8\AsynchronousJobs\Job\Sum;
  */
 class JobTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * Test that 2 sleeping jobs will run properly asynchronously
+     */
     public function testTwoSleepJobs()
     {
         $startTime = time();
 
+        // Create 2 sleeping jobs
         $job1 = new Sleep();
         $job1->time = 10;
 
@@ -40,6 +45,7 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $job1->start();
         $job2->start();
 
+        // Starting the jobs should be super quick even throught each job needs 10 second to run.
         $runTime = time() - $startTime;
         $this->assertLessThan(2, $runTime);
 
@@ -50,6 +56,10 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $this->assertLessThan(19, $runTime);
     }
 
+    /**
+     * Creating multiple sleeping jobs. 10 job sleeps 10 second should require 100 seconds
+     * but with asynchronous it goes fast.
+     */
     public function testMultiSleepJobs()
     {
         $startTime = time();
@@ -69,6 +79,9 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $this->assertLessThan(50, $runTime);
     }
 
+    /**
+     * Test that jobs get's the paramters inputed to them and that the result of the job is available after.
+     */
     public function testInputOutPut()
     {
         $job1 = new Sum();
@@ -88,6 +101,9 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(17, $job2->result);
     }
 
+    /**
+     * Test the single job wait.
+     */
     public function testWait()
     {
         $startTime = time();
@@ -98,6 +114,44 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $job1->wait();
 
         $runTime = time() - $startTime;
+
+        // Check that the job is terminated
+        $this->assertFalse($job1->isRunning(), "Job should have stopped");
+        // Check that it did take more then 5 second.
         $this->assertGreaterThanOrEqual(5, $runTime);
     }
+
+    /**
+     * Is running can be called multiple times it needs to work in all cases
+     */
+    public function testIsRunning() {
+
+        $job1 = new Sleep();
+        $job1->time = 1;
+        $job1->start();
+
+        $this->assertTrue($job1->isRunning(), 'Job should be running still');
+
+        $job1->wait();
+        $this->assertFalse($job1->isRunning(), 'Job should have stopped');
+        $this->assertFalse($job1->isRunning(), 'Calling this multiple times should have no effect');
+        $this->assertFalse(JobRunner::getInstance()->isRunning($job1), "or using the longer method");
+    }
+
+    public function testException() {
+        // Create job that we know will throw an exception
+        $job = new error();
+        $job->start();
+
+        // wait for it to end. Won't use the wait jobs as it might wait for ever !
+        sleep(2);
+
+        // Check that the job is terminated
+        $this->assertFalse(JobRunner::getInstance()->isRunning($job), "Job should have stopped");
+        // Check the exception
+        $this->assertNotNull($job->getException());
+        // Check the exception message
+        $this->assertEquals("test", $job->getException()->getMessage());
+    }
+
 }
