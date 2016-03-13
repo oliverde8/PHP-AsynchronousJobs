@@ -58,6 +58,10 @@ class JobRunner
         return self::$_instance;
     }
 
+    protected function getCmd($cmd) {
+        return PHP_BINARY . " $cmd";
+    }
+
     /**
      * JobRunner constructor.
      */
@@ -71,11 +75,13 @@ class JobRunner
         // Check if exec is enabled on this server.
         if (substr(php_uname(), 0, 7) == "Windows") {
             try {
+                echo "\n\n" . $this->getCmd('-v') . "\n\n";
                 $WshShell = new \COM("WScript.Shell");
-                $WshShell->Run("echo exec", 0, false);
+                $WshShell->Run($this->getCmd('-v /C dir /S %windir%'), 0, false);
                 $this->exec = true;
             } catch (\Exception $e) {
                 // nothing exec is disabled.
+                throw $e;
             }
         } else if(exec('echo EXEC') == 'EXEC'){
             $this->exec = true;
@@ -151,39 +157,40 @@ class JobRunner
      */
     public function start(Job $job)
     {
+        $jobData = new JobData();
 
-        $jobDir = $this->_getJobDirectory($job);
-        $logFile = realpath($this->getDirectory()) . '/run.log';
-        $lockFile = $this->_lockJob($jobDir);
+        if ($this->exec) {
+            $jobDir = $this->_getJobDirectory($job);
+            $logFile = realpath($this->getDirectory()) . '/run.log';
+            $lockFile = $this->_lockJob($jobDir);
 
-        if ($lockFile) {
-            $jobData = new JobData();
-            $jobData->lockFile = $lockFile;
-            $jobData->job = $job;
-            $jobData->jobDir = $jobDir;
+            if ($lockFile) {
+                $jobData->lockFile = $lockFile;
+                $jobData->job = $job;
+                $jobData->jobDir = $jobDir;
 
-            $this->runningJobs[spl_object_hash($job)] = $jobData;
+                $this->runningJobs[spl_object_hash($job)] = $jobData;
 
-            if ($this->exec) {
 
                 $data = $job->getData();
                 $data['___class'] = get_class($job);
 
                 file_put_contents("$jobDir/in.serialize", serialize($data));
 
-                $cmd = "php " . __DIR__ . "/../../bin/AsynchronousJobsRun.php \"$jobDir\" >> $logFile";
+                $cmd = $this->getCmd(__DIR__ . "/../../bin/AsynchronousJobsRun.php \"$jobDir\" >> $logFile");
                 if (substr(php_uname(), 0, 7) == "Windows") {
                     $WshShell = new \COM("WScript.Shell");
                     $WshShell->Run("$cmd /C dir /S %windir%", 0, false);
                 } else {
                     exec($cmd . " &");
                 }
-            } else {
-                $job->run();
-            }
 
-        } else {
-            $this->pendingJobs[] = $job;
+            } else {
+                $this->pendingJobs[] = $job;
+            }
+        }else {
+            $job->run();
+            $job->end($jobData);
         }
     }
 
