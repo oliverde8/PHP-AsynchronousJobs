@@ -75,7 +75,6 @@ class JobRunner
         // Check if exec is enabled on this server.
         if (substr(php_uname(), 0, 7) == "Windows") {
             try {
-                echo "\n\n" . $this->getCmd('-v') . "\n\n";
                 $WshShell = new \COM("WScript.Shell");
                 $WshShell->Run($this->getCmd('-v /C dir /S %windir%'), 0, false);
                 $this->exec = true;
