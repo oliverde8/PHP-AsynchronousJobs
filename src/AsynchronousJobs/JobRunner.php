@@ -58,8 +58,7 @@ class JobRunner
         return self::$_instance;
     }
 
-    protected function getCmd($cmd) {
-        echo 'cmd: "'. PHP_BINARY .'" '.  $cmd."\n";
+    protected function getCmd($cmd) {        
         return '"'. PHP_BINARY .'" '. $cmd;
     }
 
