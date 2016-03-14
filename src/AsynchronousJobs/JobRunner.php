@@ -165,7 +165,7 @@ class JobRunner
             $lockFile = $this->_lockJob($jobDir);
 
             if ($lockFile) {
-                $jobdir = str_replace("/", DIRECTORY_SEPARATOR, $jobDir);
+                // $jobdir = str_replace("/", DIRECTORY_SEPARATOR, $jobDir);
 
                 $jobData->lockFile = $lockFile;
                 $jobData->job = $job;
@@ -178,7 +178,7 @@ class JobRunner
 
                 file_put_contents("$jobDir/in.serialize", serialize($data));
 
-                $cmd = $this->getCmd(realpath(__DIR__ . "/../../bin/AsynchronousJobsRun.php") . " \"$jobDir\" >> $logFile");
+                $cmd = $this->getCmd('"'.realpath(__DIR__ . "/../../bin/AsynchronousJobsRun.php") . "\" $jobDir >> $logFile");
                 if (substr(php_uname(), 0, 7) == "Windows") {
                     $WshShell = new \COM("WScript.Shell");
                     $WshShell->Run("$cmd /C dir /S %windir%", 0, false);
