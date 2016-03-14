@@ -58,8 +58,8 @@ class JobRunner
         return self::$_instance;
     }
 
-    protected function getCmd($cmd) {
-        return PHP_BINARY . " $cmd";
+    protected function getCmd($cmd) {        
+        return '"'. PHP_BINARY .'" '. $cmd;
     }
 
     /**
@@ -74,7 +74,7 @@ class JobRunner
         }
         // Check if exec is enabled on this server.
         if (substr(php_uname(), 0, 7) == "Windows") {
-            try {
+            try {                
                 $WshShell = new \COM("WScript.Shell");
                 $WshShell->Run($this->getCmd('-v /C dir /S %windir%'), 0, false);
                 $this->exec = true;
@@ -123,7 +123,7 @@ class JobRunner
      */
     protected function _getJobDirectory(Job $job)
     {
-        $jobDir = $this->getDirectory() . '/' . $job->getId();
+        $jobDir = $this->getDirectory() . DIRECTORY_SEPARATOR . $job->getId();
         $this->_prepareDirectory($jobDir);
 
         return $jobDir;
@@ -164,19 +164,20 @@ class JobRunner
             $lockFile = $this->_lockJob($jobDir);
 
             if ($lockFile) {
+                // $jobdir = str_replace("/", DIRECTORY_SEPARATOR, $jobDir);
+
                 $jobData->lockFile = $lockFile;
                 $jobData->job = $job;
                 $jobData->jobDir = $jobDir;
 
                 $this->runningJobs[spl_object_hash($job)] = $jobData;
 
-
                 $data = $job->getData();
                 $data['___class'] = get_class($job);
 
                 file_put_contents("$jobDir/in.serialize", serialize($data));
 
-                $cmd = $this->getCmd(__DIR__ . "/../../bin/AsynchronousJobsRun.php \"$jobDir\" >> $logFile");
+                $cmd = $this->getCmd('"'.realpath(__DIR__ . "/../../bin/AsynchronousJobsRun.php") . "\" $jobDir >> $logFile");
                 if (substr(php_uname(), 0, 7) == "Windows") {
                     $WshShell = new \COM("WScript.Shell");
                     $WshShell->Run("$cmd /C dir /S %windir%", 0, false);
